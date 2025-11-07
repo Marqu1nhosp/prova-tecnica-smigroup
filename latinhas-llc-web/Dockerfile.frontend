@@ -1,0 +1,23 @@
+# Estágio 1: Build do React
+FROM node:20-slim AS build-stage
+WORKDIR /app
+
+# 1. Copia o package.json e package-lock.json (necessário para o npm install)
+# O contexto de build é latinhas-llc-web, então isso copia os arquivos que estão DENTRO dessa pasta.
+COPY package*.json ./ 
+
+# 2. Instala as dependências
+RUN npm install
+
+# 3. Copia o restante do código fonte do React (incluindo src/)
+COPY . . 
+
+# 4. Variável de ambiente e Build
+ENV VITE_APP_API_URL=http://api:3333 
+RUN npm run build 
+
+# Estágio 2: Produção com Nginx (SEM MUDANÇAS)
+FROM nginx:alpine AS production-stage
+COPY --from=build-stage /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

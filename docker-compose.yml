@@ -1,0 +1,27 @@
+version: '3.9'
+services:
+  # Serviço da API (Backend)
+  api:
+    build:
+      context: ./latinhas-llc-api
+      dockerfile: Dockerfile.api
+    container_name: fastify_api
+    restart: always
+    # Mapeia a porta 3333 do host para a porta 3333 do container
+    ports:
+      - "3333:3333" 
+    environment:
+      NODE_ENV: production
+      # Se Fastify usar variáveis de ambiente para a porta, ajuste aqui
+      PORT: 3333 
+      DATABASE_URL: "file:./dev.db"
+  # Serviço do Front-end (React com Nginx)
+  frontend:
+    build:
+      context: ./latinhas-llc-web
+      dockerfile: Dockerfile.frontend
+    container_name: react_web
+    restart: always
+    # Mapeia a porta 5173 do host para a porta 80 do container Nginx (Acesso Web)
+    ports:
+      - "5173:80"

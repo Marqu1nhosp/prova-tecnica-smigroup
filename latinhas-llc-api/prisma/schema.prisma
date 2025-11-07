@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// Este é o arquivo de configuração do Prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Configuração do banco de dados (SQLite, o banco de dados leve sugerido)
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// Seu modelo de dados 'Demand'
+model Demand {
+  id              String    @id @default(uuid())
+  startDate       DateTime
+  endDate         DateTime
+  status          String    // Status (PLANEJAMENTO, EM ANDAMENTO, CONCLUÍDO)
+  createdAt       DateTime  @default(now())
+  
+  // Relacionamento 1:N com Itens
+  items           Item[]
+}
+
+// Novo modelo para os itens que compõem a Demanda (BÔNUS)
+model Item {
+  id              String    @id @default(uuid())
+  sku             String    // SKU individual do produto (ex: 4298)
+  description     String    // Descrição do produto (ex: LATINHA VERMELHA COM AZUL)
+  plannedTotal    Float     // Quantidade planejada do item (Tons)
+  plannedProduced Float     @default(0) 
+  // Link para a Demanda
+  demandId        String
+  demand          Demand    @relation(fields: [demandId], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime  @default(now())
+}
