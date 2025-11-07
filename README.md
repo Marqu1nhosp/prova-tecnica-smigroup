@@ -272,7 +272,7 @@ O frontend estará rodando em `http://localhost:5173`
 
 1. Na raiz do projeto (pasta `prova-tecnica-smigroup`), execute:
 ```bash
-docker-compose up --build
+docker-compose up --build -d
 ```
 
 2. Acesse:

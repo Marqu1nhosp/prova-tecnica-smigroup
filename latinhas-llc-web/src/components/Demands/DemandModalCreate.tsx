@@ -8,6 +8,8 @@ import { toast } from "sonner"
 import { isAxiosError } from "axios"
 import { Plus, Trash2 } from "lucide-react"
 
+
+// Validação do formulário com Zod
 const createDemandFormSchema = z
     .object({
         startDate: z.string().nonempty("A data inicial é obrigatória"),
@@ -35,6 +37,7 @@ interface DemandModalCreateProps {
 }
 
 export function DemandModalCreate({ isOpen, onClose, onDemandCreated }: DemandModalCreateProps) {
+   // Configuração do React Hook Form
     const {
         register,
         handleSubmit,
@@ -49,12 +52,14 @@ export function DemandModalCreate({ isOpen, onClose, onDemandCreated }: DemandMo
             items: [{ sku: "", plannedTotal: 0, description: "", plannedProduced: 0 }],
         },
     })
-
+    
+    // Gerencia array de itens dinâmicos
     const { fields, append, remove } = useFieldArray({
         control,
         name: "items",
     })
 
+    // Função para criar demanda e itens
     async function handleCreateDemand(data: CreateDemand) {
         console.log("Modal create", data)
         try {
@@ -66,6 +71,7 @@ export function DemandModalCreate({ isOpen, onClose, onDemandCreated }: DemandMo
             const createdDemand = await createDemand(demandPayload)
             const demandId = createdDemand.id
 
+            // Cria os itens da demanda
             const createdItems = []
             for (const item of data.items) {
                 const payload = {
@@ -80,8 +86,10 @@ export function DemandModalCreate({ isOpen, onClose, onDemandCreated }: DemandMo
                 createdItems.push(createdItem)
             }
 
+            // Junta demanda e itens
             const demandWithItems: Demand = { ...createdDemand, items: createdItems }
 
+            // Atualiza lista e fecha modal
             onDemandCreated(demandWithItems)
             onClose()
             reset()

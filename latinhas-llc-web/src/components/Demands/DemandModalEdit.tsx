@@ -5,7 +5,7 @@ import z from "zod";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import type { Demand, EditDemandItemPayload } from "@/types/demandTypes";
-import {  updateDemandItem, deleteDemandItem } from "../../services/api";
+import { updateDemandItem, deleteDemandItem } from "../../services/api";
 import { DemandModal } from "./DemandModal";
 import { formatDate } from "@/utils/formatDate";
 import { isAxiosError } from "axios";
@@ -33,6 +33,7 @@ interface DemandModalEditProps {
 }
 
 export function DemandModalEdit({ isOpen, onClose, demand, onDemandUpdated }: DemandModalEditProps) {
+  // Configuração do React Hook Form
   const { register, handleSubmit, reset, control, formState: { errors } } = useForm<EditDemand>({
     resolver: zodResolver(EditDemandSchema),
     defaultValues: {
@@ -40,6 +41,7 @@ export function DemandModalEdit({ isOpen, onClose, demand, onDemandUpdated }: De
     },
   });
 
+  // Gerenciamento de array de itens
   const { fields, remove } = useFieldArray({ control, name: "items", keyName: "fieldId" });
 
   // páginação
@@ -52,24 +54,25 @@ export function DemandModalEdit({ isOpen, onClose, demand, onDemandUpdated }: De
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const paginatedFields = fields.slice(startIndex, endIndex);
 
+  // Preenche o formulário com os itens existentes
   useEffect(() => {
     if (demand) {
       reset({
         items: demand.items.length > 0
           ? demand.items.map((item) => ({
-              backendId: item.id,
-              sku: item.sku,
-              description: item.description,
-              plannedTotal: item.plannedTotal,
-              plannedProduced: item.plannedProduced,
-            }))
+            backendId: item.id,
+            sku: item.sku,
+            description: item.description,
+            plannedTotal: item.plannedTotal,
+            plannedProduced: item.plannedProduced,
+          }))
           : [{
-              backendId: undefined,
-              sku: "",
-              description: "",
-              plannedTotal: demand.plannedTotal,
-              plannedProduced: 0,
-            }],
+            backendId: undefined,
+            sku: "",
+            description: "",
+            plannedTotal: demand.plannedTotal,
+            plannedProduced: 0,
+          }],
       });
       setCurrentPage(1);
     }
@@ -107,62 +110,68 @@ export function DemandModalEdit({ isOpen, onClose, demand, onDemandUpdated }: De
     }
   }
 
- 
-async function handleEditItem(data: EditDemand) {
-  if (!demand) return;
 
-  try {
-    // Atualiza apenas os itens que já existem (possuem backendId)
-    const updatedItems: Demand["items"] = await Promise.all(
-      data.items
-        .filter((item) => item.backendId) // 👉 ignora itens novos
-        .map(async (item) => {
-          const payload = {
-            demandId: demand.id,
-            sku: item.sku,
-            description: item.description || "Sem descrição",
-            plannedTotal: Number(item.plannedTotal) || 0,
-            plannedProduced: Number(item.plannedProduced) || 0,
-          };
+  async function handleEditItem(data: EditDemand) {
+    if (!demand) return;
 
-          await updateDemandItem(item.backendId!, payload as EditDemandItemPayload);
+    try {
+      // Atualiza apenas os itens que já existem
+      const updatedItems: Demand["items"] = await Promise.all(
+        data.items
+          .filter((item) => item.backendId) // ignora itens novos
+          .map(async (item) => {
+            const payload = {
+              demandId: demand.id,
+              sku: item.sku,
+              description: item.description || "Sem descrição",
+              plannedTotal: Number(item.plannedTotal) || 0,
+              plannedProduced: Number(item.plannedProduced) || 0,
+            };
 
-          const originalItem = demand.items.find((i) => i.id === item.backendId);
+            await updateDemandItem(item.backendId!, payload as EditDemandItemPayload);
 
-          return {
-            id: item.backendId!,
-            createdAt: originalItem?.createdAt || new Date().toISOString(),
-            ...payload,
-          };
-        })
-    );
+            const originalItem = demand.items.find((i) => i.id === item.backendId);
 
-    // Recalcula totais e status da demanda
-    const totalPlanned = updatedItems.reduce((acc, i) => acc + (i.plannedTotal ?? 0), 0);
-    const totalProduced = updatedItems.reduce((acc, i) => acc + (i.plannedProduced ?? 0), 0);
+            return {
+              id: item.backendId!,
+              createdAt: originalItem?.createdAt || new Date().toISOString(),
+              ...payload,
+            };
+          })
+      );
 
-    let status: Demand["status"];
-    if (totalProduced === 0) status = "PLANEJAMENTO";
-    else if (totalProduced >= totalPlanned) status = "CONCLUIDO";
-    else status = "EM_ANDAMENTO";
+      // Recalcula totais e status da demanda
+      const { totalPlanned, totalProduced } = (demand.items ?? []).reduce(
+        (acc, item) => ({
+          totalPlanned: acc.totalPlanned + Number(item.plannedTotal ?? 0),
+          totalProduced: acc.totalProduced + Number(item.plannedProduced ?? 0),
+        }),
+        { totalPlanned: 0, totalProduced: 0 }
+      );
 
-    const updatedDemand: Demand = { ...demand, items: updatedItems, plannedTotal: totalPlanned, status };
-    onDemandUpdated(updatedDemand);
 
-    toast.success("Itens atualizados com sucesso.");
-    onClose();
-  } catch (error) {
-    let message = "Erro desconhecido ao atualizar itens.";
-    if (isAxiosError(error)) {
-      message = error.response?.data?.message || `Erro de rede: ${error.message}`;
-    } else if (error instanceof Error) {
-      message = error.message;
+      let status: Demand["status"];
+      if (totalProduced === 0) status = "PLANEJAMENTO";
+      else if (totalProduced >= totalPlanned) status = "CONCLUIDO";
+      else status = "EM_ANDAMENTO";
+
+      const updatedDemand: Demand = { ...demand, items: updatedItems, plannedTotal: totalPlanned, status };
+      onDemandUpdated(updatedDemand);
+
+      toast.success("Itens atualizados com sucesso.");
+      onClose();
+    } catch (error) {
+      let message = "Erro desconhecido ao atualizar itens.";
+      if (isAxiosError(error)) {
+        message = error.response?.data?.message || `Erro de rede: ${error.message}`;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+
+      console.error("Erro ao atualizar itens:", message);
+      toast.error(message);
     }
-
-    console.error("Erro ao atualizar itens:", message);
-    toast.error(message);
   }
-}
 
 
   return (
@@ -181,10 +190,10 @@ async function handleEditItem(data: EditDemand) {
           <table className="w-full text-left border-collapse">
             <thead className="bg-gray-300">
               <tr className="text-xs font-semibold uppercase text-gray-500">
-                <th className="py-3 px-4 rounded-tl-lg">SKU</th>
-                <th className="py-3 px-4">Descrição</th>
-                <th className="py-3 px-4">Total Planejado (Tons)</th>
-                <th className="py-3 px-4">Total Produzido (Tons)</th>
+                <th className="py-3 px-4 text-center rounded-tl-lg">SKU</th>
+                <th className="py-3 px-4 text-center">Descrição</th>
+                <th className="py-3 px-4 text-center">Total Planejado (Tons)</th>
+                <th className="py-3 px-4 text-center">Total Produzido (Tons)</th>
                 <th className="py-3 px-4 text-center rounded-tr-lg">Remover</th>
               </tr>
             </thead>
@@ -199,7 +208,7 @@ async function handleEditItem(data: EditDemand) {
                           type="text"
                           {...register(`items.${globalIndex}.sku`)}
                           disabled={!!field.backendId}
-                          className="w-full border rounded px-2 py-1 disabled:bg-transparent disabled:border-none disabled:text-gray-500"
+                          className="w-full text-center border rounded px-2 py-1 disabled:bg-transparent disabled:border-none disabled:text-gray-500"
                         />
                         {errors.items?.[globalIndex]?.sku && (
                           <p className="text-red-500 text-xs mt-1">
@@ -212,7 +221,7 @@ async function handleEditItem(data: EditDemand) {
                           type="text"
                           {...register(`items.${globalIndex}.description`)}
                           disabled={!!field.description}
-                          className="w-full border rounded px-2 py-1 disabled:bg-transparent disabled:border-none disabled:text-gray-500"
+                          className="w-full border text-center rounded px-2 py-1 disabled:bg-transparent disabled:border-none disabled:text-gray-500"
                         />
                       </td>
                       <td className="py-2 px-4">
@@ -252,7 +261,6 @@ async function handleEditItem(data: EditDemand) {
           </table>
         </div>
 
-        {/* Paginação estilo DemandsTable */}
         <div className="flex items-center justify-end mt-4 gap-2 px-4 mb-2">
           <span className="text-gray-600 text-sm">
             {totalItems === 0 ? "0 - 0" : `${startIndex + 1} - ${endIndex}`} of {totalItems}

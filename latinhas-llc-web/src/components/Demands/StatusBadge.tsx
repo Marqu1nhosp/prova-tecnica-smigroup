@@ -22,15 +22,15 @@ export function StatusBadge({ status }: StatusBadgeProps) {
 
   switch (status) {
     case 'PLANEJAMENTO':
-      colorClasses = 'bg-pink-100 text-pink-700'
+      colorClasses = 'bg-pink-100 text-black'
       break
     
     case 'EM_ANDAMENTO': 
-      colorClasses = 'bg-cyan-100 text-cyan-700'
+      colorClasses = 'bg-cyan-100 text-black'
       break
 
     case 'CONCLUIDO':
-      colorClasses = 'bg-green-100 text-green-700'
+      colorClasses = 'bg-green-100 text-black'
       break
 
     default:

@@ -32,13 +32,13 @@ export function DemandsTable({ demands, onEdit, onDelete }: DemandsTableProps) {
       <table className="w-full text-left border-collapse">
         <thead className="border-b border-gray-200 bg-gray-300">
           <tr className="text-xs font-semibold uppercase text-gray-500">
-            <th className="py-3 px-4">Editar</th>
-            <th className="py-3 px-4">Período</th>
-            <th className="py-3 px-4">SKUs</th>
-            <th className="py-3 px-4">Total Planejado</th>
-            <th className="py-3 px-4">Total Produzido</th>
-            <th className="py-3 px-4">Status</th>
-            <th className="py-3 px-4">Remover</th>
+            <th className="py-3 px-4 text-center">Editar</th>
+            <th className="py-3 px-4 text-center">Período</th>
+            <th className="py-3 px-4 text-center">SKUs</th>
+            <th className="py-3 px-4 text-center">Total Planejado(Tons)</th>
+            <th className="py-3 px-4 text-center">Total Produzido(Tons)</th>
+            <th className="py-3 px-4 text-center">Status</th>
+            <th className="py-3 px-4 text-center">Remover</th>
           </tr>
         </thead>
 
