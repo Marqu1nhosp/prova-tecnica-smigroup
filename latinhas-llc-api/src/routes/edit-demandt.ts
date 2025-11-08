@@ -21,12 +21,6 @@ export async function editDemand(app: FastifyInstance) {
                             .refine((d) => !isNaN(d.getTime()), {
                                 message: "A data final é obrigatória",
                             }),
-                        plannedTotal: z
-                            .number()
-                            .positive("O total deve ser maior que zero"),
-                        plannedProduced: z
-                            .number()
-                            .optional(),
                         status: z
                             .enum(["PLANEJAMENTO", "EM_ANDAMENTO", "CONCLUIDO"])
                             .default("PLANEJAMENTO"),
@@ -38,7 +32,7 @@ export async function editDemand(app: FastifyInstance) {
         },
     }, async (request, reply) => {
         const demandId = request.params.demandId;
-        const { startDate, endDate, plannedTotal, plannedProduced, status } = request.body
+        const { startDate, endDate,status } = request.body
 
         try {
             const existingDemand = await prisma.demand.findUnique({
@@ -55,7 +49,6 @@ export async function editDemand(app: FastifyInstance) {
                 data: {
                     startDate,
                     endDate,
-                    plannedTotal,
                     status,
                 },
             });
