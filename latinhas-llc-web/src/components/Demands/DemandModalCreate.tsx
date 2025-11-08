@@ -23,7 +23,7 @@ const createDemandFormSchema = z
             })
         ),
     })
-    .refine((data) => new Date(data.endDate) >= new Date(data.startDate), {
+    .refine((data) => data.endDate >= data.startDate, {
         message: "A data final deve ser maior ou igual à data inicial",
         path: ["endDate"],
     })
