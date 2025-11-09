@@ -29,7 +29,7 @@ prova-tecnica-smigroup/
 │   │   │   ├── create-demand.ts
 │   │   │   ├── get-demands.ts
 │   │   │   ├── get-demand-id.ts
-│   │   │   ├── edit-demandt.ts
+│   │   │   ├── edit-demand.ts
 │   │   │   ├── delete-demand.ts
 │   │   │   ├── create-item.ts
 │   │   │   ├── edit-item.ts
@@ -108,8 +108,6 @@ O sistema utiliza dois modelos principais:
   - `sku`: Identificador único da demanda
   - `startDate`: Data de início
   - `endDate`: Data de término
-  - `plannedTotal`: Total planejado (toneladas)
-  - `plannedProduced`: Total produzido (toneladas)
   - `status`: Status da demanda
   - `items`: Relacionamento 1:N com Item
 
