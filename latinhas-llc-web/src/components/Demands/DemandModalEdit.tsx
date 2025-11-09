@@ -5,7 +5,7 @@ import z from "zod";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
 import type { Demand, EditDemandItemPayload } from "@/types/demandTypes";
-import { updateDemandItem, deleteDemandItem } from "../../services/api";
+import { updateDemandItem, deleteDemandItem, updateDemand } from "../../services/api";
 import { DemandModal } from "./DemandModal";
 import { formatDate } from "@/utils/formatDate";
 import { isAxiosError } from "axios";
@@ -111,7 +111,7 @@ export function DemandModalEdit({ isOpen, onClose, demand, onDemandUpdated }: De
   }
 
 
-  async function handleEditItem(data: EditDemand) {
+  async function handleEdit(data: EditDemand) {
     if (!demand) return;
 
     try {
@@ -141,7 +141,7 @@ export function DemandModalEdit({ isOpen, onClose, demand, onDemandUpdated }: De
       );
 
       // Recalcula totais e status da demanda
-      const { totalPlanned, totalProduced } = (demand.items ?? []).reduce(
+      const { totalPlanned, totalProduced } = (data.items ?? []).reduce(
         (acc, item) => ({
           totalPlanned: acc.totalPlanned + Number(item.plannedTotal ?? 0),
           totalProduced: acc.totalProduced + Number(item.plannedProduced ?? 0),
@@ -154,11 +154,12 @@ export function DemandModalEdit({ isOpen, onClose, demand, onDemandUpdated }: De
       if (totalProduced === 0) status = "PLANEJAMENTO";
       else if (totalProduced >= totalPlanned) status = "CONCLUIDO";
       else status = "EM_ANDAMENTO";
-
+      
       const updatedDemand: Demand = { ...demand, items: updatedItems, plannedTotal: totalPlanned, status };
+      updateDemand(demand.id, { status: status })
       onDemandUpdated(updatedDemand);
 
-      toast.success("Itens atualizados com sucesso.");
+      toast.success("Itens e demanda atualizados com sucesso.");
       onClose();
     } catch (error) {
       let message = "Erro desconhecido ao atualizar itens.";
@@ -177,7 +178,7 @@ export function DemandModalEdit({ isOpen, onClose, demand, onDemandUpdated }: De
   return (
     <DemandModal isOpen={isOpen} onClose={onClose} title="Editar demanda">
       <form
-        onSubmit={handleSubmit(handleEditItem)}
+        onSubmit={handleSubmit(handleEdit)}
         className="p-8 bg-white rounded-xl shadow-lg max-w-5xl w-full mx-auto"
       >
         <div className="flex items-center justify-between mb-4">
@@ -198,7 +199,7 @@ export function DemandModalEdit({ isOpen, onClose, demand, onDemandUpdated }: De
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {paginatedFields.length > 0 ? (
+             {paginatedFields.some(field => field.backendId || field.sku) ? (
                 paginatedFields.map((field, index) => {
                   const globalIndex = startIndex + index;
                   return (

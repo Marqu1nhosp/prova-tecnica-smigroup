@@ -4,7 +4,7 @@ import { serializerCompiler, validatorCompiler, ZodTypeProvider } from 'fastify-
 import { createDemand } from './routes/create-demand'
 import { getDemands } from './routes/get-demands';
 import { deleteDemand } from './routes/delete-demand';
-import { editDemand } from './routes/edit-demandt';
+import { editDemand } from './routes/edit-demand';
 import { getDemandId } from './routes/get-demand-id';
 import { pingRoute } from './routes/ping';
 import { createItem } from './routes/create-item';

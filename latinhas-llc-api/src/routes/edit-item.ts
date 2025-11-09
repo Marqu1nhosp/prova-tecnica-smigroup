@@ -12,7 +12,7 @@ export async function editItem(app: FastifyInstance) {
       body: z.object({
         sku: z.string().nonempty("O SKU é obrigatório"),
         description: z.string().nonempty("A descrição é obrigatória"),
-        plannedTotal: z.coerce.number().positive("O total deve ser maior que zero"),
+        plannedTotal: z.coerce.number().min(0,"O total deve ser maior que zero"),
         plannedProduced: z.coerce.number().min(0, "O total deve ser maior que zero"),
         demandId: z.string().uuid("O demandId é obrigatório")
       }),

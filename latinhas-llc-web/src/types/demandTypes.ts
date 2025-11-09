@@ -42,9 +42,7 @@ export interface EditDemandItemPayload {
 }
 
 export interface EditDemandPayload {
-  startDate: string
-  endDate: string
-  plannedTotal: number
-  plannedProduced: number 
-  status: DemandStatus
+  startDate?: string
+  endDate?: string
+  status?: DemandStatus
 }

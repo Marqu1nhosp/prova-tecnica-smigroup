@@ -15,20 +15,15 @@ export async function editDemand(app: FastifyInstance) {
                             .coerce.date()
                             .refine((d) => !isNaN(d.getTime()), {
                                 message: "A data inicial é obrigatória",
-                            }),
+                            }).optional(),
                         endDate: z
                             .coerce.date()
                             .refine((d) => !isNaN(d.getTime()), {
                                 message: "A data final é obrigatória",
-                            }),
+                            }).optional(),
                         status: z
                             .enum(["PLANEJAMENTO", "EM_ANDAMENTO", "CONCLUIDO"])
-                            .default("PLANEJAMENTO"),
                     })
-                    .refine((data) => data.endDate >= data.startDate, {
-                        message: "A data final deve ser maior ou igual à data inicial",
-                        path: ["endDate"],
-                    }),
         },
     }, async (request, reply) => {
         const demandId = request.params.demandId;

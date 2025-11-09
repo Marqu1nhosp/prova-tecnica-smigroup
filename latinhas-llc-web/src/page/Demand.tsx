@@ -15,7 +15,6 @@ export function DemandsPage() {
   const [isAddModalOpenCreate, setIsAddModalOpenCreate] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedDemand, setSelectedDemand] = useState<Demand | null>(null)
-
   // Carrega as demandas ao montar
   async function loadDemands() {
     try {

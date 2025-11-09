@@ -61,7 +61,6 @@ export function DemandModalCreate({ isOpen, onClose, onDemandCreated }: DemandMo
 
     // Função para criar demanda e itens
     async function handleCreateDemand(data: CreateDemand) {
-        console.log("Modal create", data)
         try {
             const demandPayload: CreateDemandPayload = {
                 startDate: data.startDate,
